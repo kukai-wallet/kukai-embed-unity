@@ -2,13 +2,13 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
-public class URLSchemeHandler : MonoBehaviour
+public class DeepLinkHandler : MonoBehaviour
 {
     public Text textfield;
     public Button signInButton;
     public Button sendOperation;
 
-    public static URLSchemeHandler Instance { get; private set; }
+    public static DeepLinkHandler Instance { get; private set; }
     public string deeplinkURL;
 
     void Start() {
@@ -47,5 +47,6 @@ public class URLSchemeHandler : MonoBehaviour
         textfield.gameObject.SetActive(true);
         
         textfield.text = "Address: " +  address.Substring(0, 4) + "..." + address.Substring(address.Length - 4);
+        WebViewController.buyURL = $"https://global.transak.com/?apiKey=f1336570-699b-4181-9bd1-cdd57206981f&cryptoCurrencyCode=XTZ&walletAddressesData={{\"coins\":{{\"XTZ\":{{\"address\":\"{address}\"}}}}}}&fiatAmount=30&fiatCurrency=USD&hideMenu=true&isFeeCalculationHidden=true&disableWalletAddressForm=true";
     }
 }

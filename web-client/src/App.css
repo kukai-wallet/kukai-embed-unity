@@ -34,3 +34,8 @@
   border: 1.5px solid #ddd;
   cursor: pointer;
 }
+
+.wallet-connectors button:hover,
+.wallet-connectors button:active {
+  background: #f5f5f5;
+}

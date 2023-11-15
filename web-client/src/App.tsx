@@ -16,6 +16,15 @@ enum STATUS {
   READY,
 }
 
+enum PROVIDERS {
+  BEACON = "beacon",
+  KUKAI_EMBED = "kukai-embed",
+}
+
+function makeDeeplinkWithAddress(address: string) {
+  return `${REDIRECT_DEEPLINK}kukai-embed/?address=${address}`
+}
+
 function App() {
   const [error, setError] = useState('')
   const [status, setStatus] = useState(STATUS.LOADING)
@@ -44,10 +53,12 @@ function App() {
 
   async function handleLogin(event: MouseEvent<HTMLButtonElement>) {
     const { type } = event.currentTarget.dataset
-    if (type === 'beacon') {
-      await BEACON.requestPermissions()
+    if (type === PROVIDERS.BEACON) {
+      const account = await BEACON.requestPermissions()
+      window.location.href = makeDeeplinkWithAddress(account.address)
     } else {
-      await KUKAI_EMBED.login(LOGIN_CONFIG)
+      const account = await KUKAI_EMBED.login(LOGIN_CONFIG)
+      window.location.href = makeDeeplinkWithAddress(account.pkh)
     }
   }
 
@@ -57,8 +68,8 @@ function App() {
     <div className="parent">
       <div>{isLoading ? "Loading..." : "Choose Wallet"}</div>
       <div className="wallet-connectors">
-        <button disabled={isLoading} data-type="beacon" onClick={handleLogin}>Login with Beacon</button>
-        <button disabled={isLoading} data-type="kukai-embed" onClick={handleLogin}>Login with Kukai Embed</button>
+        <button disabled={isLoading} data-type={PROVIDERS.BEACON} onClick={handleLogin}>Login with Beacon</button>
+        <button disabled={isLoading} data-type={PROVIDERS.KUKAI_EMBED} onClick={handleLogin}>Login with Kukai Embed</button>
       </div>
       {error && <div className='error'>Status: {error}</div>}
     </div>

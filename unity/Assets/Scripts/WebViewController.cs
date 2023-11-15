@@ -5,7 +5,7 @@ using Gpm.WebView;
 
 public class WebViewController : MonoBehaviour
 {
-    public static string buyURL = "https://global.transak.com/?apiKey=f1336570-699b-4181-9bd1-cdd57206981f&cryptoCurrencyCode=XTZ&walletAddressesData={\"coins\":{\"XTZ\":{\"address\":\"tz2SxeQwLfqA2Fr1ink3B8V7uWNrPWJakEYo\"}}}&disableWalletAddressForm=true";
+    public static string buyURL = "https://global.transak.com/?apiKey=f1336570-699b-4181-9bd1-cdd57206981f&cryptoCurrencyCode=XTZ&walletAddressesData={\"coins\":{\"XTZ\":{\"address\":\"tz2SxeQwLfqA2Fr1ink3B8V7uWNrPWJakEYo\"}}}&fiatAmount=30&fiatCurrency=USD&hideMenu=true&isFeeCalculationHidden=true&disableWalletAddressForm=true";
    // FullScreen
 public void ShowUrlFullScreen()
 {
@@ -20,7 +20,7 @@ public void ShowUrlFullScreen()
             backgroundColor = "#FFFFFF",
             isNavigationBarVisible = true,
             navigationBarColor = "#4B96E6",
-            title = "The page title.",
+            title = "Buy Tez",
             isBackButtonVisible = true,
             isForwardButtonVisible = true,
             isCloseButtonVisible = true,

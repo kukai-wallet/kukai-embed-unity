@@ -358,6 +358,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3f2b75e2ca524619989f496cdd94b12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  textfield: {fileID: 1068992004}
+  signInButton: {fileID: 1123832075}
+  sendOperation: {fileID: 1093095701}
+  deeplinkURL: 
 --- !u!4 &869671878
 Transform:
   m_ObjectHideFlags: 0
@@ -502,7 +506,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 939209524}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d4807542c4fbb4043a5f6851e12254d9, type: 3}
+  m_Script: {fileID: 0}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &963194225

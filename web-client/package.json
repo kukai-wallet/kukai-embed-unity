@@ -19,7 +19,7 @@
     "web-vitals": "^2.1.0"
   },
   "scripts": {
-    "dev": "react-app-rewired start",
+    "dev": "GENERATE_SOURCEMAP=false react-app-rewired start",
     "build": "react-scripts build && cp apple-app-site-association ./build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
