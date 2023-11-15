@@ -16,3 +16,21 @@
   color: #550000;
   font-weight: 600;
 }
+
+.wallet-connectors {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 24px 0 0 0;
+}
+
+.wallet-connectors button {
+  height: 44px;
+  background: none;
+  font-family: inherit;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 15px;
+  border: 1.5px solid #ddd;
+  cursor: pointer;
+}
