@@ -1,6 +1,7 @@
 import { TypeOfLogin } from 'kukai-embed';
-import { MouseEvent, useEffect, useState } from 'react';
+import { MouseEvent, useEffect, useRef, useState } from 'react';
 import './App.css';
+import { PROVIDERS } from './types/constants';
 import { BEACON, KUKAI_EMBED } from './utils/wallet-connectors';
 import { initWalletConnectors } from './utils/wallet-utils';
 
@@ -16,9 +17,8 @@ enum STATUS {
   READY,
 }
 
-enum PROVIDERS {
-  BEACON = "beacon",
-  KUKAI_EMBED = "kukai-embed",
+enum PARAM_TYPES {
+  OPERATION_PAYLOAD = 'operationPayload'
 }
 
 function makeDeeplinkWithAddress(address: string) {
@@ -28,14 +28,41 @@ function makeDeeplinkWithAddress(address: string) {
 function App() {
   const [error, setError] = useState('')
   const [status, setStatus] = useState(STATUS.LOADING)
-  const [, setAddress] = useState<String | undefined>(undefined)
+  const [, setAccount] = useState<{ provider: PROVIDERS, address: string } | undefined>(undefined)
+  const operationQueue = useRef<any[]>([])
+
+  async function handleOperation(payload: any[], provider: PROVIDERS) {
+    try {
+      provider === PROVIDERS.BEACON
+        ? await BEACON.requestOperation({ operationDetails: payload })
+        : await KUKAI_EMBED.send(payload)
+    } catch {
+      console.log('error::operation')
+    }
+  }
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+
+    const operationPayload = params.get(PARAM_TYPES.OPERATION_PAYLOAD)
+
+    if (operationPayload) {
+      operationQueue.current.push({ payload: JSON.parse(operationPayload) })
+    }
+
     initWalletConnectors()
-      .then((activeAddress) => {
+      .then(({ activeAddress, provider }) => {
         if (activeAddress) {
-          window.location.href = `${REDIRECT_DEEPLINK}kukai-embed/?address=${activeAddress}`
-          setAddress(activeAddress)
+          setAccount({ address: activeAddress, provider: provider! })
+
+          if (operationQueue.current.length) {
+            const { payload } = operationQueue.current.pop()
+            handleOperation(payload, provider!)
+              .then(() => {
+                window.location.href = makeDeeplinkWithAddress(activeAddress)
+              })
+              .catch((error) => setError(error?.message))
+          }
         }
       })
       .catch((error) => {
@@ -46,19 +73,33 @@ function App() {
       })
 
     return () => {
-      // @TODO: handle logout
+      // handle logout
     }
-
   }, [])
 
   async function handleLogin(event: MouseEvent<HTMLButtonElement>) {
     const { type } = event.currentTarget.dataset
+    let address: string | undefined, provider: PROVIDERS | undefined
+
     if (type === PROVIDERS.BEACON) {
       const account = await BEACON.requestPermissions()
-      window.location.href = makeDeeplinkWithAddress(account.address)
+      address = account.address
+      provider = PROVIDERS.BEACON
     } else {
       const account = await KUKAI_EMBED.login(LOGIN_CONFIG)
-      window.location.href = makeDeeplinkWithAddress(account.pkh)
+      address = account.pkh
+      provider = PROVIDERS.KUKAI_EMBED
+    }
+
+    setAccount({ address, provider })
+
+    if (operationQueue.current.length) {
+      const { payload } = operationQueue.current.pop()
+      handleOperation(payload, provider)
+        .then(() => {
+          window.location.href = makeDeeplinkWithAddress(address!)
+        })
+        .catch((error) => setError(error?.message))
     }
   }
 
