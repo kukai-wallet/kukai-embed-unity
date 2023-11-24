@@ -42,7 +42,7 @@ function App() {
   }
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
+    const params = new URLSearchParams(decodeURIComponent(window.location.search))
 
     const operationPayload = params.get(PARAM_TYPES.OPERATION_PAYLOAD)
 
@@ -100,6 +100,8 @@ function App() {
           window.location.href = makeDeeplinkWithAddress(address!)
         })
         .catch((error) => setError(error?.message))
+    } else {
+      window.location.href = makeDeeplinkWithAddress(address!)
     }
   }
 

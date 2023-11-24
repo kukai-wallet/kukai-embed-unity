@@ -8,17 +8,11 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
-[System.Serializable]
-public class AddressObject
-{
-    public string[] addresses;
-}
-
-
 public class DeepLinkHandler : MonoBehaviour
 {
     public Text textfield;
     public Button signInButton;
+    public Button buyTezButton;
     public Button sendOperation;
     public string token;
 
@@ -26,11 +20,12 @@ public class DeepLinkHandler : MonoBehaviour
     public string deeplinkURL;
 
     private HubConnection connection;
+    private AccountUtils accountUtils = new AccountUtils();
 
     async void Start() {
         textfield.gameObject.SetActive(false);
         sendOperation.gameObject.SetActive(false);
-        await GetConnection();
+        buyTezButton.gameObject.SetActive(false);
     }
 
     private void Awake()
@@ -54,36 +49,19 @@ public class DeepLinkHandler : MonoBehaviour
         }
     }
  
-    private void onDeepLinkActivated(string url)
+    private async void onDeepLinkActivated(string url)
     {
         deeplinkURL = url;
         string address = url.Split("?address=")[1].Split('&')[0];
 
         signInButton.gameObject.SetActive(false);
         sendOperation.gameObject.SetActive(true);
+        buyTezButton.gameObject.SetActive(true);
         textfield.gameObject.SetActive(true);
         
         textfield.text = "Address: " +  address.Substring(0, 4) + "..." + address.Substring(address.Length - 4);
         WebViewController.buyURL = $"https://global.transak.com/?apiKey=f1336570-699b-4181-9bd1-cdd57206981f&cryptoCurrencyCode=XTZ&walletAddressesData={{\"coins\":{{\"XTZ\":{{\"address\":\"{address}\"}}}}}}&fiatAmount=30&fiatCurrency=USD&hideMenu=true&isFeeCalculationHidden=true&disableWalletAddressForm=true";
-    }
 
-     private async Task GetConnection()
-    {
-        connection = new HubConnectionBuilder()
-            .WithUrl("https://api.tzkt.io/v1/ws")
-            .WithAutomaticReconnect()
-            .Build();
-        await connection.StartAsync();
-
-         AddressObject addressObject = new AddressObject
-        {
-            addresses = new string[] { }
-        };
-
-        connection.On<object>("accounts", data => {
-            Debug.Log(data);
-        });
-
-         await connection.InvokeAsync("SubscribeToAccounts", addressObject);
+        await accountUtils.StartListeningForOnChainEvents(address);
     }
 };
