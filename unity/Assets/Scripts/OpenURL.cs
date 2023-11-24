@@ -26,7 +26,7 @@ public class OpenURL : MonoBehaviour
 
         string encodedParams = JsonConvert.SerializeObject(arrayOfOperations);
 
-        string fullOperationURL = deepLinkURL + "?operationPayload=" + WWW.EscapeURL(encodedParams);
+        string fullOperationURL = deepLinkURL + "?operationPayload=" + WWW.EscapeURL(encodedParams + $"&address={ActiveAccount.address}");
 
         Application.OpenURL(fullOperationURL);
     }

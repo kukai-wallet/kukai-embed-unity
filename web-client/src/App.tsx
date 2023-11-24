@@ -6,6 +6,7 @@ import { BEACON, KUKAI_EMBED } from './utils/wallet-connectors';
 import { initWalletConnectors } from './utils/wallet-utils';
 
 const REDIRECT_DEEPLINK = 'unitydl://'
+const INCOMPATIBLE_ADDRESS = 'The operation is not associated with this wallet. Please try again.'
 
 const LOGIN_CONFIG = {
   loginOptions: [TypeOfLogin.Google, TypeOfLogin.Facebook, TypeOfLogin.Twitter],
@@ -18,7 +19,8 @@ enum STATUS {
 }
 
 enum PARAM_TYPES {
-  OPERATION_PAYLOAD = 'operationPayload'
+  OPERATION_PAYLOAD = 'operationPayload',
+  ADDRESS = 'address',
 }
 
 function makeDeeplinkWithAddress(address: string) {
@@ -36,8 +38,8 @@ function App() {
       provider === PROVIDERS.BEACON
         ? await BEACON.requestOperation({ operationDetails: payload })
         : await KUKAI_EMBED.send(payload)
-    } catch {
-      console.log('error::operation')
+    } catch (error) {
+      console.warn('error::', error)
     }
   }
 
@@ -47,7 +49,8 @@ function App() {
     const operationPayload = params.get(PARAM_TYPES.OPERATION_PAYLOAD)
 
     if (operationPayload) {
-      operationQueue.current.push({ payload: JSON.parse(operationPayload) })
+      const address = params.get(PARAM_TYPES.ADDRESS)
+      operationQueue.current.push({ payload: JSON.parse(operationPayload), address })
     }
 
     initWalletConnectors()
@@ -56,7 +59,13 @@ function App() {
           setAccount({ address: activeAddress, provider: provider! })
 
           if (operationQueue.current.length) {
-            const { payload } = operationQueue.current.pop()
+            const { payload, address } = operationQueue.current.pop()
+
+            if (address !== activeAddress) {
+              handleWrongAddress(provider!)
+              return
+            }
+
             handleOperation(payload, provider!)
               .then(() => {
                 window.location.href = makeDeeplinkWithAddress(activeAddress)
@@ -77,31 +86,48 @@ function App() {
     }
   }, [])
 
+  async function handleWrongAddress(provider: PROVIDERS) {
+    setError(INCOMPATIBLE_ADDRESS)
+    provider === PROVIDERS.BEACON ? await BEACON.removeAllAccounts() : await KUKAI_EMBED.logout()
+  }
+
   async function handleLogin(event: MouseEvent<HTMLButtonElement>) {
-    const { type } = event.currentTarget.dataset
-    let address: string | undefined, provider: PROVIDERS | undefined
+    try {
 
-    if (type === PROVIDERS.BEACON) {
-      const account = await BEACON.requestPermissions()
-      address = account.address
-      provider = PROVIDERS.BEACON
-    } else {
-      const account = await KUKAI_EMBED.login(LOGIN_CONFIG)
-      address = account.pkh
-      provider = PROVIDERS.KUKAI_EMBED
-    }
+      const { type } = event.currentTarget.dataset
+      let activeAddress: string | undefined, provider: PROVIDERS | undefined
 
-    setAccount({ address, provider })
+      if (type === PROVIDERS.BEACON) {
+        const account = await BEACON.requestPermissions()
+        activeAddress = account.address
+        provider = PROVIDERS.BEACON
+      } else {
+        const account = await KUKAI_EMBED.login(LOGIN_CONFIG)
+        activeAddress = account.pkh
+        provider = PROVIDERS.KUKAI_EMBED
+      }
 
-    if (operationQueue.current.length) {
-      const { payload } = operationQueue.current.pop()
-      handleOperation(payload, provider)
-        .then(() => {
-          window.location.href = makeDeeplinkWithAddress(address!)
-        })
-        .catch((error) => setError(error?.message))
-    } else {
-      window.location.href = makeDeeplinkWithAddress(address!)
+      setAccount({ address: activeAddress, provider })
+
+      if (operationQueue.current.length) {
+        const { payload, address } = operationQueue.current.pop()
+
+        if (activeAddress !== address) {
+          handleWrongAddress(provider)
+          return
+        }
+
+        handleOperation(payload, provider)
+          .then(() => {
+            window.location.href = makeDeeplinkWithAddress(address!)
+          })
+          .catch((error) => setError(error?.message))
+      } else {
+        window.location.href = makeDeeplinkWithAddress(activeAddress!)
+      }
+    } catch (error) {
+      console.warn(error)
+      return
     }
   }
 
@@ -109,12 +135,12 @@ function App() {
 
   return (
     <div className="parent">
-      <div>{isLoading ? "Loading..." : "Choose Wallet"}</div>
+      <h1>{isLoading ? "Loading..." : "Choose Wallet"}</h1>
       <div className="wallet-connectors">
         <button disabled={isLoading} data-type={PROVIDERS.BEACON} onClick={handleLogin}>Login with Beacon</button>
         <button disabled={isLoading} data-type={PROVIDERS.KUKAI_EMBED} onClick={handleLogin}>Login with Kukai Embed</button>
       </div>
-      {error && <div className='error'>Status: {error}</div>}
+      {error && <div className='error'>⚠ {error}</div>}
     </div>
   );
 }

@@ -11,9 +11,18 @@
   font-weight: 500;
 }
 
+.parent h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+}
+
 .error {
-  margin: 42px 0 0 0;
-  color: #550000;
+  margin: 24px 24px;
+  text-align: center;
+  line-height: 140%;
+  font-size: 15px;
+  color: #930000;
   font-weight: 600;
 }
 

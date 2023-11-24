@@ -8,6 +8,11 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
+public static class ActiveAccount
+{
+    public static string address;
+}
+
 public class DeepLinkHandler : MonoBehaviour
 {
     public Text textfield;
@@ -52,16 +57,16 @@ public class DeepLinkHandler : MonoBehaviour
     private async void onDeepLinkActivated(string url)
     {
         deeplinkURL = url;
-        string address = url.Split("?address=")[1].Split('&')[0];
+        ActiveAccount.address = url.Split("?address=")[1].Split('&')[0];
 
         signInButton.gameObject.SetActive(false);
         sendOperation.gameObject.SetActive(true);
         buyTezButton.gameObject.SetActive(true);
         textfield.gameObject.SetActive(true);
         
-        textfield.text = "Address: " +  address.Substring(0, 4) + "..." + address.Substring(address.Length - 4);
-        WebViewController.buyURL = $"https://global.transak.com/?apiKey=f1336570-699b-4181-9bd1-cdd57206981f&cryptoCurrencyCode=XTZ&walletAddressesData={{\"coins\":{{\"XTZ\":{{\"address\":\"{address}\"}}}}}}&fiatAmount=30&fiatCurrency=USD&hideMenu=true&isFeeCalculationHidden=true&disableWalletAddressForm=true";
+        textfield.text = "Address: " +  ActiveAccount.address.Substring(0, 4) + "..." + ActiveAccount.address.Substring(ActiveAccount.address.Length - 4);
+        WebViewController.buyURL = $"https://global.transak.com/?apiKey=f1336570-699b-4181-9bd1-cdd57206981f&cryptoCurrencyCode=XTZ&walletAddressesData={{\"coins\":{{\"XTZ\":{{\"address\":\"{ActiveAccount.address}\"}}}}}}&fiatAmount=30&fiatCurrency=USD&hideMenu=true&isFeeCalculationHidden=true&disableWalletAddressForm=true";
 
-        await accountUtils.StartListeningForOnChainEvents(address);
+        await accountUtils.StartListeningForOnChainEvents(ActiveAccount.address);
     }
 };
