@@ -11,8 +11,40 @@
   font-weight: 500;
 }
 
-.error {
-  margin: 42px 0 0 0;
-  color: #550000;
+.parent h1 {
+  margin: 0;
+  font-size: 26px;
   font-weight: 600;
+}
+
+.error {
+  margin: 24px 24px;
+  text-align: center;
+  line-height: 140%;
+  font-size: 15px;
+  color: #930000;
+  font-weight: 600;
+}
+
+.wallet-connectors {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 24px 0 0 0;
+}
+
+.wallet-connectors button {
+  height: 44px;
+  background: none;
+  font-family: inherit;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 15px;
+  border: 1.5px solid #ddd;
+  cursor: pointer;
+}
+
+.wallet-connectors button:hover,
+.wallet-connectors button:active {
+  background: #f5f5f5;
 }

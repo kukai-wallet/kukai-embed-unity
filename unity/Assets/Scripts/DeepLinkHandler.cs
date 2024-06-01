@@ -1,19 +1,36 @@
+using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.DependencyInjection;
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
-public class URLSchemeHandler : MonoBehaviour
+public static class ActiveAccount
+{
+    public static string address;
+}
+
+public class DeepLinkHandler : MonoBehaviour
 {
     public Text textfield;
     public Button signInButton;
+    public Button buyTezButton;
     public Button sendOperation;
+    public string token;
 
-    public static URLSchemeHandler Instance { get; private set; }
+    public static DeepLinkHandler Instance { get; private set; }
     public string deeplinkURL;
 
-    void Start() {
+    private HubConnection connection;
+    private AccountUtils accountUtils = new AccountUtils();
+
+    async void Start() {
         textfield.gameObject.SetActive(false);
         sendOperation.gameObject.SetActive(false);
+        buyTezButton.gameObject.SetActive(false);
     }
 
     private void Awake()
@@ -37,15 +54,19 @@ public class URLSchemeHandler : MonoBehaviour
         }
     }
  
-    private void onDeepLinkActivated(string url)
+    private async void onDeepLinkActivated(string url)
     {
         deeplinkURL = url;
-        string address = url.Split("?address=")[1].Split('&')[0];
+        ActiveAccount.address = url.Split("?address=")[1].Split('&')[0];
 
         signInButton.gameObject.SetActive(false);
         sendOperation.gameObject.SetActive(true);
+        buyTezButton.gameObject.SetActive(true);
         textfield.gameObject.SetActive(true);
         
-        textfield.text = "Address: " +  address.Substring(0, 4) + "..." + address.Substring(address.Length - 4);
+        textfield.text = "Address: " +  ActiveAccount.address.Substring(0, 4) + "..." + ActiveAccount.address.Substring(ActiveAccount.address.Length - 4);
+        WebViewController.buyURL = $"https://global.transak.com/?apiKey=f1336570-699b-4181-9bd1-cdd57206981f&cryptoCurrencyCode=XTZ&walletAddressesData={{\"coins\":{{\"XTZ\":{{\"address\":\"{ActiveAccount.address}\"}}}}}}&fiatAmount=30&fiatCurrency=USD&hideMenu=true&isFeeCalculationHidden=true&disableWalletAddressForm=true";
+
+        await accountUtils.StartListeningForOnChainEvents(ActiveAccount.address);
     }
-}
+};
