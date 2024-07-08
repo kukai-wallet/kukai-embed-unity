@@ -81,7 +81,6 @@ async function handleExpression(kukaiEmbed: KukaiEmbed, payload: any) {
   const operationHash = await kukaiEmbed.signExpr(expressionToSign)
   const { name, email, typeOfLogin } = userData
 
-  console.log('got?::', operationHash)
   window.location.href = encodeURI(`${REDIRECT_DEEPLINK}kukai-embed/?address=${pkh}&name=${name}&email=${email}&typeOfLogin=${typeOfLogin}&operationHash=${operationHash}`)
 }
 
