@@ -2,10 +2,12 @@ import { KukaiEmbed, LoginConfig, TypeOfLogin } from 'kukai-embed';
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
 import { isBrowserOAuthCompatible } from './utils';
+import { makeExpression } from './utils/make-expression';
 
 enum ACTION_TYPES {
-  OPERATION = 'operation',
+  EXPRESSION = 'expression',
   LOGIN = 'login',
+  OPERATION = 'operation',
 }
 
 const REDIRECT_DEEPLINK = 'unitydl://'
@@ -37,6 +39,13 @@ function getAction() {
     return { action: ACTION_TYPES.OPERATION, payload: JSON.parse(operationPayload), typeOfLogin }
   }
 
+  const hasExpression = params.has(ACTION_TYPES.EXPRESSION)
+
+  if (hasExpression) {
+    const expressionPayload = params.get(ACTION_TYPES.EXPRESSION)!
+    return { action: ACTION_TYPES.EXPRESSION, payload: expressionPayload, typeOfLogin }
+  }
+
   return { action: ACTION_TYPES.LOGIN, typeOfLogin }
 }
 
@@ -54,6 +63,27 @@ async function handleLogin(kukaiEmbed: KukaiEmbed) {
   window.location.href = encodeURI(`${REDIRECT_DEEPLINK}kukai-embed/?address=${pkh}&name=${name}&email=${email}&authResponse=${authResponse}&message=${message}&signature=${signature}&typeOfLogin=${userData.typeOfLogin}`)
 }
 
+async function handleExpression(kukaiEmbed: KukaiEmbed, payload: any) {
+  let pkh: string, userData: any
+
+  if (!kukaiEmbed.user) {
+    const loginLayout = getLoginLayout()
+    const user = await kukaiEmbed.login(loginLayout)
+    pkh = user.pkh
+    userData = user.userData
+
+  } else {
+    pkh = kukaiEmbed.user.pkh
+    userData = kukaiEmbed.user.userData
+  }
+
+  const expressionToSign = makeExpression(payload)
+  const operationHash = await kukaiEmbed.signExpr(expressionToSign)
+  const { name, email, typeOfLogin } = userData
+
+  console.log('got?::', operationHash)
+  window.location.href = encodeURI(`${REDIRECT_DEEPLINK}kukai-embed/?address=${pkh}&name=${name}&email=${email}&typeOfLogin=${typeOfLogin}&operationHash=${operationHash}`)
+}
 
 async function handleOperation(kukaiEmbed: KukaiEmbed, payload: any) {
   let pkh: string, userData: any
@@ -88,9 +118,22 @@ function App() {
     await kukaiEmbed.current.init()
 
     try {
-      action === ACTION_TYPES.LOGIN
-        ? await handleLogin(kukaiEmbed.current)
-        : await handleOperation(kukaiEmbed.current, payload)
+      switch (action) {
+        case ACTION_TYPES.OPERATION: {
+          await handleOperation(kukaiEmbed.current, payload)
+          break
+        }
+
+        case ACTION_TYPES.LOGIN:
+        default: {
+          await handleLogin(kukaiEmbed.current)
+          break
+        }
+
+        case ACTION_TYPES.EXPRESSION: {
+          await handleExpression(kukaiEmbed.current, payload)
+        }
+      }
     } catch (error: any) {
       setError(error?.message)
     }
