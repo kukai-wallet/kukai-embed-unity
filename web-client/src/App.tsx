@@ -1,7 +1,6 @@
 import { KukaiEmbed, LoginConfig, TypeOfLogin } from 'kukai-embed';
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
-import { isBrowserOAuthCompatible } from './utils';
 import { makeExpression } from './utils/make-expression';
 
 enum ACTION_TYPES {
@@ -109,12 +108,12 @@ function App() {
   const kukaiEmbed = useRef(new KukaiEmbed({ net: "https://ghostnet.kukai.app", icon: false }))
 
   async function handleAction() {
-    if (!isBrowserOAuthCompatible()) {
+    const { action, payload } = getAction()
+    const { isBrowserOAuthCompatible } = await kukaiEmbed.current.init()
+
+    if (!isBrowserOAuthCompatible) {
       throw new Error('Please continue in an external browser')
     }
-
-    const { action, payload } = getAction()
-    await kukaiEmbed.current.init()
 
     try {
       switch (action) {
@@ -134,7 +133,12 @@ function App() {
         }
       }
     } catch (error: any) {
-      setError(error?.message)
+      let message = error?.message;
+      console.error(error)
+      if (error.errorId) {
+        message += ` | Error id: ${error.errorId}`
+      }
+      setError(`${message}`)
     }
   }
 

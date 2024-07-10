@@ -8765,10 +8765,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"kukai-embed@npm:^0.8.9":
-  version: 0.8.9
-  resolution: "kukai-embed@npm:0.8.9"
-  checksum: 10c0/932855b74e341b998a3a58514651cbc34f6a2f49e2fc6d4a0533c9c9c49e47c56d3ff7770fb8cbb8f19098e3ae97ad7c9ffd6eff0cf9f928e706ebef5d244846
+"kukai-embed@npm:0.9.2":
+  version: 0.9.2
+  resolution: "kukai-embed@npm:0.9.2"
+  checksum: 10c0/935603d584181dad4db0cb6ae2e737aef844b79e089977ad961ddf9805f682dded2ceb38ce9791d70237580848dfcd5c929a9699a4efe55fca2b28df966be5b0
   languageName: node
   linkType: hard
 
@@ -13027,7 +13027,7 @@ __metadata:
     "@types/react": "npm:^18.0.0"
     "@types/react-dom": "npm:^18.0.0"
     buffer: "npm:^6.0.3"
-    kukai-embed: "npm:^0.8.9"
+    kukai-embed: "npm:0.9.2"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-scripts: "npm:5.0.1"
