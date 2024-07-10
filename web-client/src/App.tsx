@@ -133,12 +133,19 @@ function App() {
         }
       }
     } catch (error: any) {
-      let message = error?.message;
       console.error(error)
-      if (error.errorId) {
+
+      let message = error?.message
+      let deeplinkUri = `${REDIRECT_DEEPLINK}kukai-embed/?errorMessage=${message}`
+
+      const errorId = error?.errorId
+
+      if (errorId) {
+        deeplinkUri += `&errorId=${errorId}`
         message += ` | Error id: ${error.errorId}`
       }
       setError(`${message}`)
+      window.location.href = encodeURI(deeplinkUri)
     }
   }
 
