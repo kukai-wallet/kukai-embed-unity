@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections;
+using System;
+using System.Web;
 using UnityEngine.UI;
 
 public class DeepLinkHandler : MonoBehaviour
@@ -46,6 +48,19 @@ public class DeepLinkHandler : MonoBehaviour
     private void onDeepLinkActivated(string url)
     {
         deeplinkURL = url;
+        Console.WriteLine(deeplinkURL); // prints the deeplink url that was received 
+
+        Uri httpUrl = new Uri(url);
+        var queryParameters = HttpUtility.ParseQueryString(httpUrl.Query);
+        string errorMessage = queryParameters["errorMessage"];
+        string errorId = queryParameters["errorId"];
+
+        if (!string.IsNullOrEmpty(errorMessage))
+        {
+            Console.WriteLine($"Error: {errorMessage}\nErrorId: {errorId}");
+            return;
+        }
+
         string address = url.Split("?address=")[1].Split('&')[0];
         string typeOfLogin = url.Split("&typeOfLogin=")[1].Split('&')[0];
 
