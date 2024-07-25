@@ -77,10 +77,10 @@ async function handleExpression(kukaiEmbed: KukaiEmbed, payload: any) {
   }
 
   const expressionToSign = makeExpression(payload)
-  const operationHash = await kukaiEmbed.signExpr(expressionToSign)
+  const signature = await kukaiEmbed.signExpr(expressionToSign)
   const { name, email, typeOfLogin } = userData
 
-  window.location.href = encodeURI(`${REDIRECT_DEEPLINK}kukai-embed/?address=${pkh}&name=${name}&email=${email}&typeOfLogin=${typeOfLogin}&operationHash=${operationHash}`)
+  window.location.href = encodeURI(`${REDIRECT_DEEPLINK}kukai-embed/?address=${pkh}&name=${name}&email=${email}&typeOfLogin=${typeOfLogin}&signature=${signature}`)
 }
 
 async function handleOperation(kukaiEmbed: KukaiEmbed, payload: any) {
